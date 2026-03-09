@@ -48,7 +48,7 @@ def mouse_callback(event, x, y, flags, param):
         print(f"W (가로 너비)    : {w}")
         print(f"H (세로 높이)    : {h}")
         print("-"*40)
-        print(f"👉 roi.py 입력용: ({x1}, {y1}, {w}, {h})")
+        print(f"👉 src/games/... 의 roi_config 입력용: ({x1}, {y1}, {w}, {h})")
         print("="*40 + "\n")
 
 

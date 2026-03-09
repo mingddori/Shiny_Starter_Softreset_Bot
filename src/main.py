@@ -54,6 +54,31 @@ def run_find_cameras():
         print(f"  - index={idx}, backend={backend}, resolution={width}x{height}")
 
 
+def select_game_preset():
+    from games.frlg import FRLG_Preset
+    from games.hgss import HGSS_Preset
+    from games.oras import ORAS_Preset
+    from games.bdsp import BDSP_Preset
+    
+    print("\n[INFO] 지원하는 게임 버전을 선택하세요.")
+    print("1. FireRed / LeafGreen (3세대 리메이크)")
+    print("2. HeartGold / SoulSilver (4세대 리메이크)")
+    print("3. OmegaRuby / AlphaSapphire (6세대 리메이크)")
+    print("4. BrilliantDiamond / ShiningPearl (8세대 리메이크)")
+    
+    choice = input("선택 > ").strip()
+    if choice == "1":
+        return FRLG_Preset()
+    elif choice == "2":
+        return HGSS_Preset()
+    elif choice == "3":
+        return ORAS_Preset()
+    elif choice == "4":
+        return BDSP_Preset()
+    else:
+        print("[WARN] 기본값인 FireRed / LeafGreen으로 시작합니다.")
+        return FRLG_Preset()
+
 def run_capture():
     try:
         from capture_module.capture_run import run_capture_session
@@ -61,6 +86,8 @@ def run_capture():
         print(f"[ERROR] capture_run 모듈 import 실패: {e}")
         return
 
+    game_preset = select_game_preset()
+    
     cam_input = input("카메라 번호를 입력하세요 (예: 0): ").strip()
     if not cam_input.isdigit():
         print("[ERROR] 숫자만 입력해주세요.")
@@ -71,6 +98,7 @@ def run_capture():
         run_capture_session(
             camera_index=int(cam_input),
             save_dir=str(PROJECT_ROOT / "captures" / "raw"),
+            game_preset=game_preset
         )
     except Exception as e:
         print(f"[ERROR] 캡처 실행 중 예외 발생: {e}")
@@ -85,6 +113,8 @@ def run_auto_bot():
         
     print("\n[INFO] 자동 리셋 봇 설정을 시작합니다.")
     
+    game_preset = select_game_preset()
+    
     # 카메라 설정
     cam_input = input("사용할 카메라 번호를 입력하세요 (예: 0): ").strip()
     if not cam_input.isdigit():
@@ -93,7 +123,8 @@ def run_auto_bot():
     
     try:
         start_auto_reset_session(
-            camera_index=int(cam_input)
+            camera_index=int(cam_input),
+            game_preset=game_preset
         )
     except Exception as e:
         print(f"[ERROR] 봇 실행 중 예외 발생: {e}")

@@ -4,8 +4,7 @@ import queue
 import sys
 from pathlib import Path
 from capture_module.capture_save import save_frame
-from shiny_check_bot.roi import get_roi_slice
-from shiny_check_bot.state_check import get_current_state
+from games.base_game import BaseGamePreset
 
 # msvcrt는 Windows에서만 동작합니다.
 if sys.platform == 'win32':
@@ -39,9 +38,9 @@ def input_listener(q: queue.Queue, stop_event: threading.Event):
                 print(f"[입력 스레드 오류] {e}")
                 break
 
-def run_capture_session(camera_index: int, save_dir: str):
+def run_capture_session(camera_index: int, save_dir: str, game_preset: BaseGamePreset):
     """
-    지정된 카메라 인덱스로 캡처 세션을 시작합니다.
+    지정된 카메라 인덱스와 게임 프리셋으로 캡처 세션을 시작합니다.
     """
     print(f"\n[INFO] 카메라 {camera_index}번을 엽니다 (CAP_DSHOW)...")
     
@@ -86,7 +85,7 @@ def run_capture_session(camera_index: int, save_dir: str):
             continue
 
         # 현재 화면 상태 분석
-        current_state = get_current_state(frame)
+        current_state = game_preset.get_current_state(frame)
         
         # 화면에 텍스트를 그리기 위한 복사본 (원본 프레임 보존)
         display_frame = frame.copy()
@@ -94,10 +93,10 @@ def run_capture_session(camera_index: int, save_dir: str):
         # 좌측 상단에 상태 텍스트 출력
         cv2.putText(
             display_frame, 
-            f"STATE: {current_state}", 
+            f"STATE({game_preset.game_name}): {current_state}", 
             (20, 50), # 텍스트 위치 (x, y)
             cv2.FONT_HERSHEY_SIMPLEX, 
-            1.5, # 폰트 크기
+            1.0, # 폰트 크기
             (0, 255, 0) if current_state != "UNKNOWN" else (0, 0, 255), # 식별되면 초록색, 안되면 빨간색
             3, # 선 두께
             cv2.LINE_AA
@@ -116,7 +115,7 @@ def run_capture_session(camera_index: int, save_dir: str):
         elif key == ord('r'):
             # 테스트용으로 "pokemon_summary" ROI 만 잘라서 저장
             try:
-                roi_frame = get_roi_slice(frame, "pokemon_summary")
+                roi_frame = game_preset.get_roi_slice(frame, "pokemon_summary")
                 roi_dir = str(Path(save_dir).parent / "roi")
                 save_frame(roi_frame, roi_dir)
             except Exception as e:
